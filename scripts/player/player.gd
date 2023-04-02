@@ -115,7 +115,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	
 	if Input.is_action_just_pressed("drop_item"):
 		item_manager.request_action("drop_item")
-		
+	
+	if Input.is_action_just_pressed("reload"):
+		item_manager.request_action("reload")
+	
 	if event is InputEventMouseButton:
 		if event.pressed:
 			match event.button_index:

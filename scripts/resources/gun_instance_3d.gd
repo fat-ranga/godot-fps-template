@@ -59,6 +59,8 @@ func request_action(item_action: String) -> void:
 			request_aim_stop()
 		"drop_item":
 			call_deferred("queue_free")
+		"reload":
+			reload()
 		
 
 func can_fire() -> bool:
@@ -76,6 +78,25 @@ func _physics_process(delta: float) -> void:
 	#if current_state == gun_states.FIRING:
 		#fire_projectile(bullet_projectile)
 
+func reload():
+	if item_data.current_clip_ammo < item_data.max_clip_ammo and item_data.current_extra_ammo > 0 and current_state != gun_states.RELOADING:
+		current_state = gun_states.RELOADING
+		animation_player.play("reload")
+	
+# TODO: Better to do as a method call, so you can different states of reload completeness.
+func _on_animation_player_animation_finished(anim_name: StringName) -> void:
+	if anim_name == "reload":
+		var ammo_needed = item_data.max_clip_ammo - item_data.current_clip_ammo
+			
+		if item_data.current_extra_ammo > ammo_needed:
+			item_data.current_clip_ammo = item_data.max_clip_ammo
+			item_data.current_extra_ammo -= ammo_needed
+		else:
+			item_data.current_clip_ammo += item_data.current_extra_ammo
+			item_data.current_extra_ammo = 0
+		
+		current_state = item_states.DEFAULT
+
 func request_fire() -> void:
 	if can_fire():
 		if item_data.is_automatic:
@@ -86,6 +107,8 @@ func request_fire() -> void:
 			fire_projectile(bullet_projectile)
 
 func fire_projectile(projectile_type) -> void:
+	current_state = gun_states.FIRING
+	
 	#animation_player.play("fire", -1.0, item_data.rate_of_fire)
 	animation_player.stop()
 	animation_player.play("fire")

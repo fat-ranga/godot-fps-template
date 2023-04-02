@@ -1,0 +1,3 @@
+[gd_scene format=3 uid="uid://42mn0hqs3ak7"]
+
+[node name="Bullet" type="MeshInstance3D"]

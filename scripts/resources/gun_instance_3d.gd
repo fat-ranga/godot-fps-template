@@ -1,10 +1,6 @@
 extends ItemInstance3D
 class_name GunInstance3D
 
-signal create_projectile
-
-enum gun_states{FIRING, RELOADING}
-
 # Effects.
 @export var blood_impact: PackedScene
 @export var dust_impact: PackedScene
@@ -29,23 +25,26 @@ enum gun_states{FIRING, RELOADING}
 #add_child(sound)
 #sound.play_sound(audio_stream)
 
+# Flags and stuff
+var is_reloading: bool = false
+var is_firing: bool = false
+
+
 # Optional.
 @export var equip_speed = 1.0
 @export var unequip_speed = 1.0
 @export var reload_speed = 1.0
 
-# Pool of projectiles, these are added and deleted when a gun is fired.
-var projectiles = []
-# So we can get the correct last position for each bullet.
-var projectile_index = 0
-# So that the projectile isn't clipping with the gun when spawned.
-var projectile_offset = 3.5
-# Same as with the projectile pool.
-var impact_effects = []
-
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	pass # Replace with function body.
+
+func unequip() -> void:
+	is_equipped = false
+	hide()
+func equip() -> void:
+	is_equipped = true
+	show()
 
 func request_action(item_action: String) -> void:
 	match item_action:
@@ -61,110 +60,103 @@ func request_action(item_action: String) -> void:
 			call_deferred("queue_free")
 		"reload":
 			reload()
+		"equip":
+			equip()
+		"unequip":
+			unequip()
 		
 
 func can_fire() -> bool:
-	if current_state == gun_states.RELOADING:
+	if is_reloading:
 		return false
 	if item_data.current_clip_ammo < 1:
 		return false
-	if not current_state == gun_states.FIRING:
+	if is_firing:
 		return false
 	
 	return true
 
+func can_reload() -> bool:
+	if item_data.current_clip_ammo >= item_data.max_clip_ammo:
+		return false
+	if item_data.current_extra_ammo <= 0:
+		return false
+	if is_reloading:
+		return false
+		
+	return true
+
 func _physics_process(delta: float) -> void:
 	pass
-	#if current_state == gun_states.FIRING:
-		#fire_projectile(bullet_projectile)
 
 func reload():
-	if item_data.current_clip_ammo < item_data.max_clip_ammo and item_data.current_extra_ammo > 0 and current_state != gun_states.RELOADING:
-		current_state = gun_states.RELOADING
+	if can_reload():
+		is_firing = false
+		is_reloading = true
 		animation_player.play("reload")
 	
-# TODO: Better to do as a method call, so you can different states of reload completeness.
+# TODO: Better to do this as a method call in the animation track, so you can have different stages of reload completeness.
 func _on_animation_player_animation_finished(anim_name: StringName) -> void:
-	if anim_name == "reload":
-		var ammo_needed = item_data.max_clip_ammo - item_data.current_clip_ammo
+	match anim_name:
+		"reload":
+			var ammo_needed = item_data.max_clip_ammo - item_data.current_clip_ammo
+
+			if item_data.current_extra_ammo > ammo_needed:
+				item_data.current_clip_ammo = item_data.max_clip_ammo
+				item_data.current_extra_ammo -= ammo_needed
+			else:
+				item_data.current_clip_ammo += item_data.current_extra_ammo
+				item_data.current_extra_ammo = 0
 			
-		if item_data.current_extra_ammo > ammo_needed:
-			item_data.current_clip_ammo = item_data.max_clip_ammo
-			item_data.current_extra_ammo -= ammo_needed
-		else:
-			item_data.current_clip_ammo += item_data.current_extra_ammo
-			item_data.current_extra_ammo = 0
+			is_reloading = false
+			EventBus.player_reloaded.emit(item_data) # Updates the player ui.
+			
+		"fire":
+			is_firing = false
 		
-		current_state = item_states.DEFAULT
-
-func request_fire() -> void:
-	if can_fire():
-		if item_data.is_automatic:
-			current_state = gun_states.FIRING
-			#animation_player.get_animation("fire").loop = true # So we can set it to false later.
-			
-		else:
-			fire_projectile(bullet_projectile)
-
-func fire_projectile(projectile_type) -> void:
-	current_state = gun_states.FIRING
-	
-	#animation_player.play("fire", -1.0, item_data.rate_of_fire)
-	animation_player.stop()
-	animation_player.play("fire")
-	item_data.current_clip_ammo -= 1
-	print(item_data.current_clip_ammo)
 
 func request_fire_stop() -> void:
-	current_state == item_states.DEFAULT
-	#animation_player.get_animation("fire").loop =
+	is_firing = false
+
+func request_fire() -> void:
+	if !can_fire():
+		return
+	
+	is_firing = true
+	
+	if item_data.is_automatic:
+		animation_player.play("fire", -1.0, item_data.rate_of_fire)
+	else:
+		animation_player.play("fire", -1.0, item_data.rate_of_fire)
+
+# Called from the animation track.
+func fire_projectile() -> void:
+	
+	# This check here is for burst-fire weapons that call this function multiple
+	# times on the same animation track. This makes sure the gun won't go into negative ammo.
+	if item_data.current_clip_ammo < 1:
+		return
+	
+	print("bang")
+	
+	item_data.current_clip_ammo -= 1
+	
+	if player_camera_ray == null:
+		print("no player camera ray")
+		#return
+	
+	# Spawn a raycast from the centre of the player camera.
+	#player_camera_ray.force_raycast_update()
+	
+	var projectile_transform: Transform3D
+
+	projectile_transform.basis = muzzle.global_transform.basis
+	projectile_transform.origin = muzzle.global_transform.origin
+
+	# This gets picked up by the projectile manager, which spawns a proectile.
+	EventBus.projectile_fired.emit(item_data, projectile_transform)
 
 func request_aim() -> void:
 	print("aiming")
 func request_aim_stop() -> void:
 	print("not_aiming")
-
-func process_projectiles(delta):
-	for bullet in projectiles:
-		# Get the last position of the bullet, from which we can draw the ray.
-		bullet.last_position = bullet.translation
-		
-		# Delete bullet if it's existed for too long.
-		bullet.lifetime -= delta
-		if bullet.lifetime < 0:
-			# Delete the bullet and remove it from the array.
-			bullet.queue_free()
-			projectiles.erase(bullet)
-		
-		bullet.global_translate(-bullet.transform.basis.z * item_data.projectile_speed)
-		var space_state = get_world_3d().direct_space_state
-		
-		var ray_parameters := PhysicsRayQueryParameters3D.create(
-				bullet.last_position,
-				bullet.global_transform.origin,) #TODO: collision mask, self
-		
-		var collision = space_state.intersect_ray(ray_parameters)
-		if collision:
-			var impact
-			# Spawn the hit effect a little bit away from the surface to reduce clipping.
-			var impact_position = (collision.position) + (collision.normal * 0.2)
-			var hit = collision.collider
-			
-			# Check if we hit an enemy, then damage them. Spawn the correct impact effect.
-			if hit.is_in_group("Enemy"):
-				hit.damage(item_data.damage)
-				#var new_impact = Global.instantiate_node(blood_impact, impact_position)
-				var new_impact = call_deferred("add_child", blood_impact)
-				new_impact.position = impact_position
-				
-				impact_effects.append(new_impact)
-			else:
-				#var new_impact = Global.instantiate_node(dust_impact, impact_position)
-				
-				var new_impact = call_deferred("add_child", dust_impact)
-				new_impact.position = impact_position
-				
-				impact_effects.append(new_impact)
-			# Delete the bullet and remove it from the array.
-			bullet.queue_free()
-			projectiles.erase(bullet)

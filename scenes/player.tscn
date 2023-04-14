@@ -34,12 +34,15 @@ near = 0.04
 far = 2000.0
 
 [node name="Hands" type="Node3D" parent="Camera3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.155, -0.114, -0.218)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.400573, -0.343266, -0.464964)
 script = ExtResource("3_uitb4")
 
 [node name="Fists" parent="Camera3D/Hands" instance=ExtResource("3_fwub4")]
 
 [node name="AK47" parent="Camera3D/Hands" instance=ExtResource("3_lcq1y")]
-transform = Transform3D(-4.37114e-09, 0, 0.1, 0, 0.1, 0, -0.1, 0, -4.37114e-09, 0, 0, 0)
+
+[node name="RayCast3D" type="RayCast3D" parent="Camera3D"]
+target_position = Vector3(0, 0, -1000)
+collide_with_areas = true
 
 [node name="PlayerUI" parent="." instance=ExtResource("2_ptk7f")]

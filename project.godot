@@ -15,6 +15,10 @@ run/main_scene="res://scenes/world.tscn"
 config/features=PackedStringArray("4.0", "GL Compatibility")
 config/icon="res://icon.svg"
 
+[autoload]
+
+EventBus="*res://scripts/global/event_bus.gd"
+
 [filesystem]
 
 import/blender/enabled=false

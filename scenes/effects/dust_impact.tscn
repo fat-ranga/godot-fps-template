@@ -15,6 +15,7 @@ size = Vector3(0.3, 0.3, 0.3)
 [node name="DustImpact" type="GPUParticles3D"]
 amount = 32
 lifetime = 2.0
+one_shot = true
 explosiveness = 1.0
 fract_delta = false
 process_material = SubResource("ParticleProcessMaterial_u5ubv")

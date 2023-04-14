@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cfd5dsc74vbul"]
+
+[ext_resource type="Script" path="res://scripts/projectile_manager.gd" id="1_cxhyi"]
+
+[node name="ProjectileManager" type="Node3D"]
+script = ExtResource("1_cxhyi")

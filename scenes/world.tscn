@@ -1,6 +1,8 @@
-[gd_scene load_steps=7 format=3 uid="uid://ceh01r8pyftte"]
+[gd_scene load_steps=10 format=3 uid="uid://ceh01r8pyftte"]
 
 [ext_resource type="PackedScene" uid="uid://kqsxuguvtlfw" path="res://scenes/player.tscn" id="1_y2pk6"]
+[ext_resource type="PackedScene" uid="uid://cfd5dsc74vbul" path="res://scenes/projectile_manager.tscn" id="2_4ne08"]
+[ext_resource type="Resource" uid="uid://cqq6s264brqh7" path="res://data/projectiles/762x39.tres" id="3_l4tje"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_cnvxc"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -15,10 +17,14 @@ sky = SubResource("Sky_cs1bb")
 tonemap_mode = 2
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_er5fw"]
-size = Vector3(20, 1, 20)
+size = Vector3(60, 1, 20)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3kjaj"]
+albedo_color = Color(0.176471, 0.176471, 0.176471, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_3pp4y"]
-size = Vector3(20, 1, 20)
+material = SubResource("StandardMaterial3D_3kjaj")
+size = Vector3(60, 1, 20)
 
 [node name="World" type="Node3D"]
 
@@ -40,3 +46,6 @@ mesh = SubResource("BoxMesh_3pp4y")
 
 [node name="Player" parent="." instance=ExtResource("1_y2pk6")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.23483, -1.19209e-07, -1.84415)
+
+[node name="ProjectileManager" parent="." instance=ExtResource("2_4ne08")]
+projectile_data = ExtResource("3_l4tje")

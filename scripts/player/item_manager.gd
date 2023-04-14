@@ -1,5 +1,7 @@
 extends Node3D
 
+#signal update_user_interface
+
 var current_item_slot = "Primary"
 var item_index: int = 0 # For switching items via scroll wheel, which requires a numeric key.
 var is_changing_item: bool = true
@@ -18,7 +20,6 @@ var is_changing_item: bool = true
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	pass
-	#set_item(, "Secondary")
 
 func set_item(item: String, slot: String = current_item_slot) -> void:
 	request_action("drop_item", slot)
@@ -47,6 +48,7 @@ func next_item():
 	if items[items.keys()[item_index]] == null:
 		next_item()
 	else:
+		request_action("unequip") # Unequip currently-held item.
 		set_current_item(items.keys()[item_index])
 
 func previous_item():
@@ -58,6 +60,7 @@ func previous_item():
 	if items[items.keys()[item_index]] == null:
 		previous_item()
 	else:
+		request_action("unequip") # Unequip currently-held item.
 		set_current_item(items.keys()[item_index])
 
 func set_current_item(item_slot: String):

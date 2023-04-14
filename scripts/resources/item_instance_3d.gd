@@ -1,8 +1,7 @@
 extends Node3D
 class_name ItemInstance3D
 
-enum item_states{DEFAULT, EQUIPPING, UNEQUIPPING}
-var current_state = item_states.DEFAULT
+var player_camera_ray: RayCast3D
 
 @export var item_data: ItemData
 # Rigidbody version for picking up/dropping.
@@ -19,12 +18,6 @@ func equip() -> void:
 	is_equipped = true
 	show()
 
-func request_primary_action() -> void:
-	pass
-
-func request_secondary_action() -> void:
-	pass
-
 func request_action(item_action: String) -> void:
 	match item_action:
 		"drop_item":
@@ -33,6 +26,5 @@ func request_action(item_action: String) -> void:
 		"equip":
 			equip()
 		"unequip":
-			if !is_equipped:
-				unequip()
+			unequip()
 			

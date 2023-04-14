@@ -33,7 +33,7 @@ _subresources={
 "fire": {
 "save_to_file/enabled": true,
 "save_to_file/keep_custom_tracks": true,
-"save_to_file/path": "res://data/animations/items/ak_47/fire.res",
+"save_to_file/path": "res://data/animations/items/ak_47/fire.tres",
 "settings/loop_mode": 0,
 "slice_1/end_frame": 0,
 "slice_1/loop_mode": 0,
@@ -1832,7 +1832,7 @@ _subresources={
 "reload": {
 "save_to_file/enabled": true,
 "save_to_file/keep_custom_tracks": true,
-"save_to_file/path": "res://data/animations/items/ak_47/reload.res",
+"save_to_file/path": "res://data/animations/items/ak_47/reload.tres",
 "settings/loop_mode": 0,
 "slice_1/end_frame": 0,
 "slice_1/loop_mode": 0,

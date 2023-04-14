@@ -71,7 +71,8 @@ func process_projectiles(delta):
 				#var impact_transform = Transform3D(collision.normal, collision.position)
 				var impact_transform = Transform3D(Basis(), collision.position)
 				
-				var new_impact = instantiate_node(dust_impact, impact_transform)
+				var new_impact: GPUParticles3D = instantiate_node(dust_impact, impact_transform)
+				new_impact.emitting = true
 
 				impact_effects.append(new_impact)
 			# Delete the bullet and remove it from the array.

@@ -13,6 +13,7 @@ color = Color(0.447059, 0.0980392, 0, 1)
 size = Vector3(0.3, 0.3, 0.3)
 
 [node name="DustImpact" type="GPUParticles3D"]
+emitting = false
 amount = 32
 lifetime = 2.0
 one_shot = true

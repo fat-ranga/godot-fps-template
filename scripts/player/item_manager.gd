@@ -1,15 +1,14 @@
 extends Node3D
 
-#signal update_user_interface
-
 var current_item_slot = "Primary"
-var item_index: int = 0 # For switching items via scroll wheel, which requires a numeric key.
+var item_index: int = 1 # For switching items via scroll wheel, which requires a numeric key.
 var is_changing_item: bool = true
 
 @onready var all_items: Dictionary = {
 	"ak_47":preload("res://scenes/items/ak_47.tscn")
 }
 
+# IMPORTANT: Make sure these are in the same order as update_item_index().
 @onready var items: Dictionary = {
 	"Melee":$Fists,
 	"Primary":$AK47,
@@ -19,7 +18,7 @@ var is_changing_item: bool = true
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	pass
+	update_item_index()
 
 func set_item(item: String, slot: String = current_item_slot) -> void:
 	request_action("drop_item", slot)
@@ -35,6 +34,10 @@ func request_action(item_action: String, slot: String = current_item_slot) -> vo
 		items[slot].request_action(item_action)
 	else:
 		print("No item currently equipped in slot " + slot)
+	
+	if item_action == "drop_item" and slot == current_item_slot:
+		print(current_item_slot + str(item_index))
+		next_item()
 
 
 # There would be an infinite loop for these two if we had no items at all,
@@ -46,8 +49,10 @@ func next_item():
 		item_index = 0
 	
 	if items[items.keys()[item_index]] == null:
+		print("null")
 		next_item()
 	else:
+		print("not null")
 		request_action("unequip") # Unequip currently-held item.
 		set_current_item(items.keys()[item_index])
 
@@ -64,15 +69,20 @@ func previous_item():
 		set_current_item(items.keys()[item_index])
 
 func set_current_item(item_slot: String):
+	print("current item set")
 	current_item_slot = item_slot
 	request_action("equip")
+	print(current_item_slot + str(item_index))
+	EventBus.update_player_ui.emit(items[current_item_slot].item_data)
 
 # Scroll item change.
 func update_item_index():
 	match current_item_slot:
-		"Primary":
+		"Melee":
 			item_index = 0
-		"Secondary":
+		"Primary":
 			item_index = 1
-		"Grenade":
+		"Secondary":
 			item_index = 2
+		"Grenade":
+			item_index = 3

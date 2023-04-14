@@ -56,7 +56,8 @@ func _ready() -> void:
 	camera.current = true
 	
 	EventBus.projectile_fired.connect(_on_projectile_fired) # For recoil and stuff.
-	EventBus.player_reloaded.connect(_on_player_reloaded) # For updating the ui after reloading.
+	#EventBus.player_reloaded.connect(_on_player_reloaded) # For updating the ui after reloading.
+	EventBus.update_player_ui.connect(_on_update_player_ui) # For updating the ui after reloading.
 	
 	# Convert these two to radians because Godot likes it, I suppose.
 	camera_upper_clamp_rad = deg_to_rad(CAMERA_UPPER_CLAMP)
@@ -261,4 +262,7 @@ func _on_projectile_fired(item_data, projectile_transform):
 	#item_manager.translate(Vector3(0,0.01,0))
 
 func _on_player_reloaded(item_data):
+	ui.update_ammo(item_data)
+
+func _on_update_player_ui(item_data):
 	ui.update_ammo(item_data)

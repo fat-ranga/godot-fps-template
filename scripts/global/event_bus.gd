@@ -1,7 +1,7 @@
 extends Node
 
 signal projectile_fired(item_data: ItemData, projectile_transform: Transform3D)
-signal player_reloaded(item_data: ItemData)
+signal update_player_ui(item_data: ItemData)
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:

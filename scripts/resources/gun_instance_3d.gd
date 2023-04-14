@@ -109,7 +109,7 @@ func _on_animation_player_animation_finished(anim_name: StringName) -> void:
 				item_data.current_extra_ammo = 0
 			
 			is_reloading = false
-			EventBus.player_reloaded.emit(item_data) # Updates the player ui.
+			EventBus.update_player_ui.emit(item_data)
 			
 		"fire":
 			is_firing = false

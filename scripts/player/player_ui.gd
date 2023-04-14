@@ -16,7 +16,7 @@ func _process(delta: float) -> void:
 	pass
 
 func update_ammo(item_data: ItemData) -> void:
-	if item_data.current_clip_ammo == null:
+	if item_data.slot_type == "Melee":
 		ammo_rect.hide()
 		return
 	
